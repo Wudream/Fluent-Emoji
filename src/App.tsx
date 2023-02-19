@@ -1,12 +1,16 @@
-import { Component, createSignal, For } from 'solid-js';
+import { Component, createSignal, For ,onMount,createEffect } from 'solid-js';
 
 import SelectButton from './components/SelectButton';
 
-const borderStyle = {
-    ["border-red"]: true,
-    ["border-2"]: true,
-    ["border-solid"]: true
-};
+const pathToImage = (path) => {
+    return new Promise(resolve => {
+        const img = new Image()
+        img.src = path
+        img.onload = () => {
+            resolve(img)
+        }
+    })
+}
 
 const App: Component = () => {
     const [headImages, setHeadImages] = createSignal([]);
@@ -49,6 +53,24 @@ const App: Component = () => {
     }
     loadImage()
 
+    let canvas, canvasSize = 130;
+
+    createEffect(() => { 
+        const headPath = selectedHeadImage()
+        const eyesPath = selectedEyesImage()
+        const mouthPath = selectedMouthImage()
+        const detailsPath = selectedDetailsImage()
+        Promise.all([pathToImage(headPath), pathToImage(eyesPath),pathToImage(mouthPath),pathToImage(detailsPath)]).then(images =>{
+            const ctx = canvas.getContext('2d')
+            ctx.clearRect(0, 0, canvasSize, canvasSize)
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(0, 0, canvasSize, canvasSize)
+            images.forEach(img => {
+                ctx.drawImage(img, 0, 0)
+            })
+        })
+     })
+
     const handClickHead = (i) => {
         setSelectedHead(i)
 
@@ -85,8 +107,26 @@ const App: Component = () => {
         setSelectedDetails(details)
     }
 
+    const exportImage = () => { 
+        canvas.toBlob((blob) => {
+            const url = URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = `${Date.now()}.png`
+            a.click()
+        })
+     }
+
     return (<>
         <h1 text="2xl" border-2 font="bold">Fluent Emoji Maker</h1>
+
+        <div mt-8 h-32  >
+            <canvas ref={canvas} width={canvasSize} height={canvasSize}></canvas>
+        </div>
+        {/* 
+        // @ts-ignore */}
+        <button m-3 onclick={[getRandom]}>Random</button>
+        <button onclick={() => { exportImage() }}>Export</button>
         <h2 mt-4 text-sm font="bold">Head</h2>
         <div mt-8 flex='~ row wrap' gap-2>
             <For each={headImages()}>
@@ -127,16 +167,8 @@ const App: Component = () => {
                 )}
             </For>
         </div>
-
-        <div mt-8 h-32 border-red border-solid border-2 >
-            <img absolute w-24 h-24 src={selectedHeadImage()} alt="" />
-            <img absolute w-24 h-24 src={selectedEyesImage()} alt="" />
-            <img absolute w-24 h-24 src={selectedMouthImage()} alt="" />
-            <img absolute w-24 h-24 src={selectedDetailsImage()} alt="" />
-        </div>
-        {/* 
-        // @ts-ignore */}
-        <button onclick={[getRandom]}>Random</button>
+        
+        
     </>)
 };
 
