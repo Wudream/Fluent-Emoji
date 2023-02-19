@@ -1,0 +1,23 @@
+{
+  "name": "emoji",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@unocss/preset-attributify": "^0.49.7",
+    "babel-preset-solid": "^1.6.10",
+    "typescript": "^4.9.3",
+    "unocss": "^0.49.7",
+    "vite": "^4.1.2",
+    "vite-plugin-solid": "^2.5.0"
+  },
+  "dependencies": {
+    "@unocss/reset": "^0.49.7",
+    "solid-js": "^1.6.11"
+  }
+}
